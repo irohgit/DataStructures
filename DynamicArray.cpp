@@ -10,7 +10,18 @@
 // 12 Nov 2026 : Implement Static Array
 // 13 Nov 2026 : Start on DynamicArray class header
 // 15 Nov 2026 : Finished DynamicArray header, implemented array destructor [] 
-// 19 Nov 2026 : Implemented Grow(), Append(); Getters; Test
+// 19 Nov 2026 : Implemented Grow(), Append(); Getters; operator[]; Test
+// 19 Nov 2026 : Implemented Growth Test comparing geometric array growth vs 
+//               increasing array by 1 on every append.
+//               Result: 
+//                  Geometric Doubling:
+//                      Appends: 1,000
+//                      Copies: 1,023 elements
+//                      Space Cost: ~n
+//                  Linear Growth + 1:
+//                      Appends: 1,000
+//                      Copies: 499,500
+//                      Space Cost: ~ n^2/2, matches prediction;
 
 #include <iostream>
 #include <cstddef>
@@ -20,7 +31,13 @@ class DynamicArray{
 public:
     using SizeType = std::size_t;
 
+    enum class GrowthRule{
+        Double,
+        PlusOne
+    };
+
     DynamicArray() = default;
+    explicit DynamicArray(GrowthRule InRule);
     ~DynamicArray();
 
     DynamicArray(const DynamicArray&) = delete;
@@ -94,9 +111,16 @@ private:
     SizeType CopyCount = 0; // Number of elements copied during Grow();
     SizeType Size      = 0; // Amount of elements currently stored in array.
     
+    // Member Enums
+    GrowthRule Rule = GrowthRule::Double;
 };
 
 // ===== DYNAMIC ARRAY IMPLEMENTATION =====
+
+// GrowthRule Constructor
+// Using Member initialiser list
+DynamicArray::DynamicArray(GrowthRule InRule) : Rule(InRule){}
+
 // Destructor
 DynamicArray::~DynamicArray(){
     
@@ -133,12 +157,16 @@ void DynamicArray::Append(int Value){
 void DynamicArray::Grow(){
     //Resource Setup
     SizeType NewCapacity = 0;
-    // 1. Allocate: A new block of memory. Condition 1: Default 2x. Condition 2: 1 if 0 
+    // 1. Decide and allocate: 1 if empty; otherwise double (Rule: Double) or add one slot (Capacity + 1).
     if(this->Capacity==0){
         NewCapacity=1;
     }
-    else{
+    else if (this->Rule == GrowthRule::Double) {
         NewCapacity=this->Capacity*2;
+    }
+    else{
+        //The growth rule is PlusOne 
+        NewCapacity=this->Capacity + 1;
     }
 
     int* NewData = new int [NewCapacity]; 
@@ -208,7 +236,19 @@ int main(int argc, const char* argv[]){
     // Expected: Prints 100, previously it was 50. Size stays 5.
     TestArray[4] = 100;
     std::cout << TestArray[4] << '\n'; 
+
+    DynamicArray DefaultRuleDouble;
+    DynamicArray PlusOne(DynamicArray::GrowthRule::PlusOne);
+
+    for (DynamicArray::SizeType i = 0; i < 1000; ++i){
+        DefaultRuleDouble.Append(i);
+        PlusOne.Append(i);
+    }
+    std::cout << "Double: CopyCount " << DefaultRuleDouble.GetCopyCount()
+              << '\n';
+    std::cout << "PlusOne: CopyCount " << PlusOne.GetCopyCount();
 }
+
 //Definitions
 // Stack:
 //   - Lifetime: One function call its scope {}
