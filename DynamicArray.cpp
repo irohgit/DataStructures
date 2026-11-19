@@ -10,7 +10,7 @@
 // 12 Nov 2026 : Implement Static Array
 // 13 Nov 2026 : Start on DynamicArray class header
 // 15 Nov 2026 : Finished DynamicArray header, implemented array destructor [] 
-// 19 Nov 2026 : Implemented Grow(), Append();
+// 19 Nov 2026 : Implemented Grow(), Append(); Getters; Test
 
 #include <iostream>
 #include <cstddef>
@@ -100,7 +100,20 @@ DynamicArray::~DynamicArray(){
     delete[] Data;
 }
 
-// TODO: Grow(); 
+//Getter (1) - Capacity
+DynamicArray::SizeType DynamicArray::GetCapacity() const{
+    return this->Capacity;
+}
+//Getter (2) - CopyCount
+DynamicArray::SizeType DynamicArray::GetCopyCount() const{
+    return this->CopyCount;
+}
+//Getter (3) - Size
+DynamicArray::SizeType DynamicArray::GetSize() const{
+    return this->Size; 
+}
+
+
 
 void DynamicArray::Append(int Value){
    // Check if Array is Full: Does Size == Capacity?
@@ -118,8 +131,12 @@ void DynamicArray::Grow(){
     //Resource Setup
     SizeType NewCapacity = 0;
     // 1. Allocate: A new block of memory. Condition 1: Default 2x. Condition 2: 1 if 0 
-    if(this->Capacity==0){NewCapacity=1;}
-    else{ NewCapacity=this->Capacity*2;}
+    if(this->Capacity==0){
+        NewCapacity=1;
+    }
+    else{
+        NewCapacity=this->Capacity*2;
+    }
 
     int* NewData = new int [NewCapacity]; 
     // 2. Copy: Every stored element from index 0 of old array to new array. 
@@ -136,7 +153,7 @@ void DynamicArray::Grow(){
         // Update capacity 
     delete[] Data;
     Data = NewData;
-    this->Capacity = NewCapacity; 
+    this->Capacity = NewCapacity;
 }
 
 // =====          END                 ===== 
@@ -155,8 +172,25 @@ void StaticArray(){
 
 int main(int argc, const char* argv[]){
     // StaticArray();
+    DynamicArray TestArray;
+    
+    //Test: Append 5 numbers to an empty dynamic array
+    // State BEFORE each append, and expected result:
+    // 1st (10): Capacity 0, Size 0 -> full  -> Grow to 1
+    // 2nd (20): Capacity 1, Size 1 -> full  -> Grow to 2
+    // 3rd (30): Capacity 2, Size 2 -> full  -> Grow to 4
+    // 4th (40): Capacity 4, Size 3 -> room  -> no Grow
+    // 5th (50): Capacity 4, Size 4 -> full  -> Grow to 8
+    // Expected CopyCount after each: 0, 1, 3, 3, 7
+    
+    for (int Value = 10; Value <= 50; Value += 10)
+    {
+        TestArray.Append(Value);
+        std::cout<< "Size " << TestArray.GetSize()
+                 << "  Capacity " << TestArray.GetCapacity()
+                 << "  CopyCount " << TestArray.GetCopyCount() << '\n';
+    }
 }
-
 //Definitions
 // Stack:
 //   - Lifetime: One function call its scope {}
