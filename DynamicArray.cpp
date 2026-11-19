@@ -10,7 +10,7 @@
 // 12 Nov 2026 : Implement Static Array
 // 13 Nov 2026 : Start on DynamicArray class header
 // 15 Nov 2026 : Finished DynamicArray header, implemented array destructor [] 
-// 19 Nov 2026 : Implemented Grow();
+// 19 Nov 2026 : Implemented Grow(), Append();
 
 #include <iostream>
 #include <cstddef>
@@ -32,6 +32,7 @@ public:
         // Return Type: void
         // Return: None
         //Per [sequence.reqmts] back() is defined as the element just before   end(). I will use the word append as it carries a clear meaning. "back" = The element at index size()-1.
+        //
 
     int& operator[](SizeType Index);
         // Method [2]: operator[](SizeType Index);
@@ -100,6 +101,18 @@ DynamicArray::~DynamicArray(){
 }
 
 // TODO: Grow(); 
+
+void DynamicArray::Append(int Value){
+   // Check if Array is Full: Does Size == Capacity?
+   if(this->Size == this->Capacity){
+       // Make Room
+       this->Grow();
+   }
+   // Write into Empty Slot
+   Data[Size] = Value; 
+   // Record Size
+   ++this->Size;
+}
 
 void DynamicArray::Grow(){
     //Resource Setup
