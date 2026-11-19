@@ -10,6 +10,7 @@
 // 12 Nov 2026 : Implement Static Array
 // 13 Nov 2026 : Start on DynamicArray class header
 // 15 Nov 2026 : Finished DynamicArray header, implemented array destructor [] 
+// 19 Nov 2026 : Implemented Grow();
 
 #include <iostream>
 #include <cstddef>
@@ -100,6 +101,31 @@ DynamicArray::~DynamicArray(){
 
 // TODO: Grow(); 
 
+void DynamicArray::Grow(){
+    //Resource Setup
+    SizeType NewCapacity = 0;
+    // 1. Allocate: A new block of memory. Condition 1: Default 2x. Condition 2: 1 if 0 
+    if(this->Capacity==0){NewCapacity=1;}
+    else{ NewCapacity=this->Capacity*2;}
+
+    int* NewData = new int [NewCapacity]; 
+    // 2. Copy: Every stored element from index 0 of old array to new array. 
+        // On every copy, increment CopyCount
+        // Ensure that it loops over size and not capacity.
+    for (SizeType i = 0; i < this->Size; ++i)
+    {
+        NewData[i] = Data[i]; 
+        ++this->CopyCount;
+    }
+    // 3. Transfer ownership:
+        // Free old block of memory,
+        // Point Data variable to new block
+        // Update capacity 
+    delete[] Data;
+    Data = NewData;
+    this->Capacity = NewCapacity; 
+}
+
 // =====          END                 ===== 
 
 void StaticArray(){
@@ -138,7 +164,12 @@ int main(int argc, const char* argv[]){
 //    Cost is slower middle array insertion of O(n)
 //    Cost is reallocation when array size needs to increase
 //        Reallocation can invalidate pointers in array.
-
+// Moving Data:
+//    Every "move" at the hardware level is a copy that goes through the CPU:
+//        Load: The CPU reads a value from the old address into a register, its "little hands".
+//        Store: It writes that register into the new address.
+//        Register is the holding spot. Old values stay where it was until you
+//        free it, which is why it must be freed.
 // Goal: Prove the n^2 vs n claim for reallocation cost.
 // Claim 1: Growing by +1 copies 1 + 2 + ... + (n-1) elements over n pushes,
 //          about n^2 / 2 copies total: O(n^2), so O(n) per push.
