@@ -14,6 +14,7 @@
 
 #include <iostream>
 #include <cstddef>
+#include <cassert>
 
 class DynamicArray{
 public:
@@ -44,7 +45,9 @@ public:
                     //any other element.
         // Parameters: An `index` of SizeType
         // Return Type: int&
-        // Return: int& . A reference to the value at the index.
+        // Return Success: int& . A reference to the value at the index.
+        // Return Fail: Fails when Index >= Size.
+        //              assert(Index < Size); 
         // What I Learnt: Check Index < Size, not Index < Capacity. Only 0 to Size - 1 are elements. Slots past Size hold garbage, not "none": an int has no null, and by Stroustrup's zero-overhead principle ("you don't pay for what you don't use") new memory isn't cleared, because Grow and Append always write a slot before anything reads it.
 
     SizeType GetCapacity() const;
@@ -154,9 +157,17 @@ void DynamicArray::Grow(){
     delete[] Data;
     Data = NewData;
     this->Capacity = NewCapacity;
+
 }
 
-// =====          END                 ===== 
+int& DynamicArray::operator[](SizeType Index){
+    // [x] Test Fail Condition
+    // Precondition: Index must be one of the stored elements.
+    assert(Index < this->Size && "Index out of range: must be less than Size");
+    // Read Part 
+    return Data[Index];
+}
+// =====  END DYNAMIC ARRAY IMPLEMENTATION       ===== 
 
 void StaticArray(){
     int Values[5] = {1,2,3,4,5};
@@ -190,6 +201,13 @@ int main(int argc, const char* argv[]){
                  << "  Capacity " << TestArray.GetCapacity()
                  << "  CopyCount " << TestArray.GetCopyCount() << '\n';
     }
+   
+    // TestArray[5] = 5
+
+    // operator[] test: overwrite the 5th element (index 4). 
+    // Expected: Prints 100, previously it was 50. Size stays 5.
+    TestArray[4] = 100;
+    std::cout << TestArray[4] << '\n'; 
 }
 //Definitions
 // Stack:
